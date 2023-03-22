@@ -35,6 +35,9 @@ PAdptArray CreateAdptArray(COPY_FUNC copy, DEL_FUNC del, PRINT_FUNC print){
 }
 
 void DeleteAdptArray(PAdptArray pAdptArray){
+    if(pAdptArray == NULL){
+        return;
+    }
     //delete any element in the array
     for(size_t i=0; i<pAdptArray->size; i++){
         if (pAdptArray->array[i] != NULL){
@@ -48,6 +51,10 @@ void DeleteAdptArray(PAdptArray pAdptArray){
 }
 
 Result SetAdptArrayAt(PAdptArray pAdptArray, int index, PElement pElement){
+    //if the arguments are not valid
+    if(index<0 || pAdptArray == NULL){
+        return FAIL;
+    }
     //in case we need to realocc the array
     if(pAdptArray->size <= index){
         pAdptArray->array = (PElement*)realloc(pAdptArray->array,sizeof(PElement)*(index+1));
@@ -55,10 +62,16 @@ Result SetAdptArrayAt(PAdptArray pAdptArray, int index, PElement pElement){
         if(pAdptArray->array == NULL){
             return FAIL;
         }
-        pAdptArray->array[index] =  pAdptArray->copyFunc(pElement);
-         //check if the copy succeed
-        if(pAdptArray->array[index] == NULL){
-            return FAIL;
+        //in case we have got a NULL element 
+        if(pElement == NULL){
+            pAdptArray->array[index] = NULL;
+        }
+        else{    
+            pAdptArray->array[index] =  pAdptArray->copyFunc(pElement);
+            //check if the copy succeed
+            if(pAdptArray->array[index] == NULL){
+                return FAIL;
+            }
         }
         //reset all the empty values to NULL
         for(size_t i=pAdptArray->size; i<index; i++){
@@ -81,10 +94,15 @@ Result SetAdptArrayAt(PAdptArray pAdptArray, int index, PElement pElement){
 }
 
 PElement GetAdptArrayAt(PAdptArray pAdptArray, int index){
-    //the index isn't  valid
-    if (index >= pAdptArray->size){
+    //the pAdptArray isn't valid
+    if(pAdptArray == NULL){
         return NULL;
     }
+    //the index isn't  valid
+    if (index >= pAdptArray->size || index < 0){
+        return NULL;
+    }
+    //the requested elemnt isn't exist
     if (pAdptArray->array[index] == NULL){
         return NULL;
     }
@@ -104,9 +122,7 @@ void PrintDB(PAdptArray pAdptArray){
     }
     for(size_t i =0; i < pAdptArray->size; i++){
         if(pAdptArray->array[i] != NULL){
-            printf("The element in index %ld is:\n", i);
             pAdptArray->printFunc(pAdptArray->array[i]);
-            printf("\n");
         }
     }
 }
